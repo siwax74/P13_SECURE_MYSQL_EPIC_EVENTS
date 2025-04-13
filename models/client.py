@@ -2,8 +2,8 @@ from typing import Optional
 from sqlalchemy import ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from datetime import datetime, timezone
-from models.base import Base  # Import de la base
-from models.user import User  # Import du modèle User
+from models.base import Base
+from models.user import User
 
 
 class Client(Base):

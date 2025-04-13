@@ -1,6 +1,8 @@
 from termcolor import colored
 import getpass
 
+from termcolor import colored
+
 
 class CLIView:
     CLI_VERSION = "0.0.1"
@@ -19,7 +21,6 @@ class CLIView:
                        |______| Epic_Events - Secure and optimised MySQL BDD
         """
         print(colored(banner, "cyan"))
-        # Utilisation de `self` pour accéder aux variables de classe
         print(colored(f"ClI Version: {self.CLI_VERSION}", "yellow"))
         print(colored(f"Made by {self.AUTHOR}", "yellow"))
         print(colored(self.COPYRIGHT, "yellow"))
@@ -27,5 +28,5 @@ class CLIView:
     def print_login_form(self):
         print("=== Connexion ===")
         email = input("Email: ")
-        password = getpass.getpass("Mot de passe: ")  # Masque le mot de passe pour plus de sécurité
+        password = getpass.getpass("Mot de passe: ")
         return email, password

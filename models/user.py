@@ -1,6 +1,6 @@
 from sqlalchemy import Integer, String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
-from models.base import Base  # Import correct
+from models.base import Base
 
 
 class User(Base):
@@ -15,5 +15,5 @@ class User(Base):
     is_management: Mapped[bool] = mapped_column(Boolean, default=False)
     password_hash: Mapped[str] = mapped_column(String(128))
 
-    def __repr__(self):
-        return f"User(id={self.id}, username='{self.username}', email='{self.email}')"
+    def __str__(self):
+        return f"email='{self.email}'"

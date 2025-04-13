@@ -9,7 +9,6 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 import bcrypt
 
-# Charger les variables d'environnement
 load_dotenv()
 
 
@@ -26,7 +25,7 @@ class CLIController:
 
         DATABASE_URL = f"mariadb+mariadbconnector://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-        self.engine = create_engine(DATABASE_URL, echo=True)
+        self.engine = create_engine(DATABASE_URL, echo=False)
 
         Session = sessionmaker(bind=self.engine)
         self.session = Session()

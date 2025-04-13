@@ -1,26 +1,29 @@
+from functools import wraps
+import time
+
+
 class BasePermissions:
+    """Gère les rôles et permissions de l'utilisateur connecté."""
+
     def __init__(self, authenticated_user):
         self.authenticated_user = authenticated_user
-        self.roles = {
-            "commercial": self.authenticated_user.is_commercial,
-            "management": self.authenticated_user.is_management,
-            "support": self.authenticated_user.is_support,
-        }
 
-    @property
-    def is_commercial(self):
-        return self.roles.get("commercial", False)
+    @staticmethod
+    def check_permission(*allowed_roles):
+        """
+        Décorateur pour restreindre l'accès à une méthode selon les rôles autorisés.
+        Exemple : @check_permission("is_commercial", "is_support")
+        """
 
-    @property
-    def is_management(self):
-        return self.roles.get("management", False)
+        def decorator(func):
+            @wraps(func)
+            def wrapper(self, *args, **kwargs):
+                if not any(getattr(self.authenticated_user, role, False) for role in allowed_roles):
+                    print("❌ Permission refusée. Accès non autorisé.")
+                    time.sleep(1)
+                    return None
+                return func(self, *args, **kwargs)
 
-    @property
-    def is_support(self):
-        return self.roles.get("support", False)
+            return wrapper
 
-    def has_permission(self, permission_type):
-        return self.roles.get(permission_type, False)
-
-    def get_available_permissions(self):
-        return [role for role, has_permission in self.roles.items() if has_permission]
+        return decorator
