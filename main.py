@@ -1,8 +1,8 @@
-from controllers.init_controller import CLIController
+from app.controllers.login_controller import LoginController
 
 
 def main():
-    controller = CLIController()
+    controller = LoginController()
     controller.run()
     return controller
 
