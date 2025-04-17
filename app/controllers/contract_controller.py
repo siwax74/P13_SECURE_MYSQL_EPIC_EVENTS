@@ -1,27 +1,26 @@
 import re
 from app.mixins import CRUDMixin
-from app.decorators import safe_execution
+from app.decorators import Decorator
 from app.models.client import Client
 from app.models.contract import Contract
 from app.models.user import User
 from app.permissions import BasePermissions
 from app.views.contract_view import ContractView
-from app.decorators import with_banner
 
 
 #######################################################################################################################
 #                                                    CONTRATS                                                         #
 #######################################################################################################################
 class ContractController(CRUDMixin):
-    def __init__(self, session, main_view, cli_view):
+    def __init__(self, session, main_view, base_view):
         super().__init__(session)
         self.main_view = main_view
         self.contract_view = ContractView(main_view)
         self.authenticated_user = main_view.authenticated_user
-        self.cli_view = cli_view
+        self.base_view = base_view
 
     @BasePermissions.check_permission("is_commercial", "is_management")
-    @with_banner
+    @Decorator.with_banner
     def handle_contract_menu(self):
         while True:
             choice = self.contract_view.print_contract_menu()
@@ -42,8 +41,8 @@ class ContractController(CRUDMixin):
             else:
                 print("❌ Choix invalide.")
 
-    @with_banner
-    @safe_execution
+    @Decorator.with_banner
+    @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial", "is_management")
     def create_contract(self):
         client_id, total_amount, commercial_id, remaining_amount = self.contract_view.print_create_contract_view()
@@ -70,8 +69,8 @@ class ContractController(CRUDMixin):
         )
         print(f"✅ Contrat créé avec succès pour le client {client_id}.")
 
-    @with_banner
-    @safe_execution
+    @Decorator.with_banner
+    @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial", "is_management")
     def update_contract(self):
         contracts = self.session.query(Contract).all()
@@ -105,8 +104,8 @@ class ContractController(CRUDMixin):
         elif remaining_amount:
             raise ValueError("❌ Montant restant invalide.")
 
-    @with_banner
-    @safe_execution
+    @Decorator.with_banner
+    @Decorator.safe_execution
     @BasePermissions.check_permission("is_management")
     def delete_contract(self):
         contracts = self.session.query(Contract).all()
@@ -118,8 +117,8 @@ class ContractController(CRUDMixin):
 
         self.delete(Contract, contract_id)
 
-    @with_banner
-    @safe_execution
+    @Decorator.with_banner
+    @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial", "is_management", "is_support")
     def list_contracts(self):
         contracts = self.session.query(Contract).all()

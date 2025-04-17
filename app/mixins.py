@@ -1,69 +1,51 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from app.decorators import Decorator
 
 
 class CRUDMixin:
     def __init__(self, session: Session):
         self.session = session
 
+    @Decorator.safe_execution
     def create(self, model, **kwargs):
         """Créer une nouvelle instance d’un modèle."""
-        try:
-            obj = model(**kwargs)
-            self.session.add(obj)
-            self.session.commit()
-            print(f"✅ {model.__name__} créé avec succès.")
-            return obj
-        except SQLAlchemyError as e:
-            self.session.rollback()
-            print(f"❌ Erreur lors de la création de {model.__name__} : {e}")
-            return None
+        obj = model(**kwargs)
+        self.session.add(obj)
+        self.session.commit()
+        print(f"✅ Objet créé : {obj}")
+        return obj
 
+    @Decorator.safe_execution
     def update(self, model, obj_id, **kwargs):
         """Mettre à jour une instance existante."""
-        try:
-            obj = self.session.get(model, obj_id)
-            if not obj:
-                print(f"❌ {model.__name__} avec l'ID {obj_id} introuvable.")
-                return None
-
+        obj = self.session.get(model, obj_id)
+        if obj:
             for attr, value in kwargs.items():
-                if value == "":
-                    continue
-
-                setattr(obj, attr, value)
-
+                if value != "":
+                    setattr(obj, attr, value)
             self.session.commit()
-            print(f"✅ {model.__name__} avec l'ID {obj_id} mis à jour.")
+            print(f"✅ Objet mis à jour : {obj}")
             return obj
-        except SQLAlchemyError as e:
-            self.session.rollback()
-            print(f"❌ Erreur lors de la mise à jour de {model.__name__} : {e}")
+        else:
+            print(f"⚠️ Aucun objet trouvé avec l'ID {obj_id}.")
             return None
 
+    @Decorator.safe_execution
     def delete(self, model, obj_id):
         """Supprimer une instance existante."""
-        try:
-            obj = self.session.get(model, obj_id)
-            if not obj:
-                print(f"❌ {model.__name__} avec l'ID {obj_id} introuvable.")
-                return None
-
+        obj = self.session.get(model, obj_id)
+        if obj:
             self.session.delete(obj)
             self.session.commit()
-            print(f"✅ {model.__name__} avec l'ID {obj_id} supprimé.")
-            return True
-        except SQLAlchemyError as e:
-            self.session.rollback()
-            print(f"❌ Erreur lors de la suppression de {model.__name__} : {e}")
-            return False
+            print(f"✅ Objet supprimé : {obj}")
+            return obj
+        else:
+            print(f"⚠️ Aucun objet trouvé avec l'ID {obj_id}.")
+            return None
 
+    @Decorator.safe_execution
     def list(self, model):
         """Lister toutes les instances d’un modèle."""
-        try:
-            results = self.session.query(model).all()
-            print(f"✅ {len(results)} instance(s) de {model.__name__} récupérée(s).")
-            return results
-        except SQLAlchemyError as e:
-            print(f"❌ Erreur lors de la récupération de {model.__name__} : {e}")
-            return []
+        objects = self.session.query(model).all()
+        return objects

@@ -1,4 +1,4 @@
-from app.decorators import safe_execution
+from app.decorators import Decorator
 from app.mixins import CRUDMixin
 from app.models.client import Client
 from app.models.events import Event
@@ -11,8 +11,9 @@ from app.views.event_view import EventView
 #                                                    EVENEMENTS                                                       #
 #######################################################################################################################
 class EventController(CRUDMixin):
-    def __init__(self, session, main_view):
+    def __init__(self, session, main_view, base_view):
         super().__init__(session)
+        self.base_view = base_view
         self.main_view = main_view
         self.event_view = EventView(main_view)
         self.authenticated_user = main_view.authenticated_user
@@ -37,10 +38,10 @@ class EventController(CRUDMixin):
             else:
                 print("❌ Choix invalide.")
 
-    @safe_execution
+    @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial")
     def create_event(self):
-        self.cli_view.print_banner()
+        self.base_view.print_banner()
         data = self.event_view.print_create_event_view()
         if not all(data):
             raise ValueError("❌ Tous les champs sont obligatoires.")
@@ -66,7 +67,7 @@ class EventController(CRUDMixin):
             notes=notes,
         )
 
-    @safe_execution
+    @Decorator.safe_execution
     @BasePermissions.check_permission("is_management", "is_support")
     def update_event(self):
         events = self.list(Event)
@@ -82,7 +83,7 @@ class EventController(CRUDMixin):
 
         self.update(Event, event_id, updated_data)
 
-    @safe_execution
+    @Decorator.safe_execution
     @BasePermissions.check_permission("is_management")
     def delete_event(self):
         events = self.list(Event)
@@ -94,9 +95,9 @@ class EventController(CRUDMixin):
 
         self.delete(Event, event_id)
 
-    @safe_execution
+    @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial", "is_management", "is_support")
     def list_events(self):
         events = self.list(Client)
-        self.cli_view.print_banner()
+        self.base_view.print_banner()
         self.event_view.print_events_list_view(events)

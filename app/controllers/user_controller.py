@@ -1,5 +1,5 @@
 import bcrypt
-from app.decorators import safe_execution
+from app.decorators import Decorator
 from app.mixins import CRUDMixin
 from app.models.user import User
 from app.permissions import BasePermissions
@@ -10,8 +10,9 @@ from app.views.user_view import UserView
 #                                                    UTILISATEUR                                                      #
 #######################################################################################################################
 class UserController(CRUDMixin):
-    def __init__(self, session, main_view):
+    def __init__(self, session, main_view, base_view):
         super().__init__(session)
+        self.base_view = base_view
         self.main_view = main_view
         self.user_view = UserView(main_view)
         self.authenticated_user = main_view.authenticated_user
@@ -36,7 +37,7 @@ class UserController(CRUDMixin):
             else:
                 print("❌ Choix invalide.")
 
-    @safe_execution
+    @Decorator.safe_execution
     def create_user(self):
         username, email, password, is_management, is_commercial, is_support = self.user_view.print_create_user_view()
 
@@ -62,7 +63,7 @@ class UserController(CRUDMixin):
 
         return hashed_password.decode("utf-8")
 
-    @safe_execution
+    @Decorator.safe_execution
     @BasePermissions.check_permission("is_management")
     def update_user(self):
         users = self.list(User)
@@ -90,7 +91,7 @@ class UserController(CRUDMixin):
 
         print(f"✅ Utilisateur '{user.username}' mis à jour.")
 
-    @safe_execution
+    @Decorator.safe_execution
     @BasePermissions.check_permission("is_management")
     def delete_user(self):
         users = self.list(User)
@@ -103,7 +104,7 @@ class UserController(CRUDMixin):
         self.delete(User, user_id)
         print(f"✅ Utilisateur '{user.username}' supprimé.")
 
-    @safe_execution
+    @Decorator.safe_execution
     def list_users(self):
         users = self.list(User)
         self.user_view.print_user_list_view(users)
