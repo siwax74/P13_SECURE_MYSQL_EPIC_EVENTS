@@ -18,6 +18,9 @@ class EventController(CRUDMixin):
         self.event_view = EventView(main_view)
         self.authenticated_user = main_view.authenticated_user
 
+    ############################################### MENU EVENTS #######################################################
+    @Decorator.with_banner
+    @BasePermissions.check_permission("is_commercial", "is_management")
     def handle_event_menu(self):
         while True:
             choice = self.event_view.print_event_menu()
@@ -38,6 +41,8 @@ class EventController(CRUDMixin):
             else:
                 print("❌ Choix invalide.")
 
+    ############################################### CREATE EVENT ######################################################
+    @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial")
     def create_event(self):
@@ -67,6 +72,8 @@ class EventController(CRUDMixin):
             notes=notes,
         )
 
+    ############################################### UPDATE EVENT #####################################################
+    @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_management", "is_support")
     def update_event(self):
@@ -83,6 +90,8 @@ class EventController(CRUDMixin):
 
         self.update(Event, event_id, updated_data)
 
+    ############################################### DELETE EVENT ######################################################
+    @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_management")
     def delete_event(self):
@@ -95,6 +104,8 @@ class EventController(CRUDMixin):
 
         self.delete(Event, event_id)
 
+    ############################################### LIST EVENTS #######################################################
+    @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial", "is_management", "is_support")
     def list_events(self):

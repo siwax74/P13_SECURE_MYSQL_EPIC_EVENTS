@@ -1,5 +1,4 @@
 import os
-from dotenv import load_dotenv
 from app.models.user import User
 from app.views.BaseView import BaseView
 from app.controllers.main_controller import MainController
@@ -7,27 +6,27 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 import bcrypt
-from settings import DATABASE_URL
+from settings import DATABASE_URL, DSN_SENTRY
 import sentry_sdk
 from app.decorators import Decorator
 
-load_dotenv()
-
 sentry_sdk.init(
-    dsn=os.getenv("DSN_SENTRY"),
+    dsn=DSN_SENTRY,
     send_default_pii=True,
 )
 
 
+#######################################################################################################################
+#                                                    LOGIN                                                            #
+#######################################################################################################################
 class LoginController:
     def __init__(self):
-
         self.base_view = BaseView()
-
         self.engine = create_engine(DATABASE_URL, echo=False)
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
 
+    ############################################### MENU LOGIN ########################################################
     @Decorator.with_banner
     @Decorator.safe_execution
     def run(self):
@@ -38,6 +37,7 @@ class LoginController:
                 self.main_controller = MainController(self.session, authenticated_user, self.base_view)
                 return self.main_controller.run()
 
+    ############################################### AUTHENTICATE USER #################################################
     @Decorator.safe_execution
     def authenticate_user(self, email, password):
         """Vérifie si l'utilisateur existe et si le mot de passe est correct."""

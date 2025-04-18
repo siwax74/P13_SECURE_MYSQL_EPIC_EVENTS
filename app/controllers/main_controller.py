@@ -8,6 +8,9 @@ from app.mixins import CRUDMixin
 from app.views.main_view import MainView
 
 
+#######################################################################################################################
+#                                                    MAIN CONTROLLER                                                  #
+#######################################################################################################################
 class MainController(CRUDMixin):
     def __init__(self, session, authenticated_user, base_view):
         super().__init__(session)
@@ -19,6 +22,7 @@ class MainController(CRUDMixin):
         self.contract_controller = ContractController(session, self.main_view, base_view)
         self.event_controller = EventController(session, self.main_view, base_view)
 
+    ############################################### MENU MAIN #########################################################
     @Decorator.with_banner
     @Decorator.safe_execution
     def run(self):
@@ -42,6 +46,7 @@ class MainController(CRUDMixin):
                 print("❌ Choix invalide. Veuillez réessayer.")
                 return None
 
+    ############################################### LOGOUT ###########################################################
     def handle_logout(self):
         if self.base_view.print_logout_view() == "y":
             self.session.close()

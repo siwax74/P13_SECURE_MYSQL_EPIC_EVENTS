@@ -17,7 +17,9 @@ class ClientController(CRUDMixin):
         self.client_view = ClientView(main_view)
         self.authenticated_user = main_view.authenticated_user
 
+    ############################################### MENU CLIENT #######################################################
     @Decorator.with_banner
+    @BasePermissions.check_permission("is_commercial", "is_management")
     def handle_client_menu(self):
         while True:
             choice = self.client_view.print_client_menu()
@@ -39,6 +41,7 @@ class ClientController(CRUDMixin):
                 print("❌ Choix invalide.")
                 return None
 
+    ############################################### CREATE CLIENT #####################################################
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial")
@@ -68,6 +71,7 @@ class ClientController(CRUDMixin):
             Client, name=name, email=email, phone=phone, company=company, contact_commercial=contact_commercial
         )
 
+    ############################################### UPDATE CLIENT #####################################################
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial")
@@ -98,6 +102,7 @@ class ClientController(CRUDMixin):
         else:
             self.update(Client, client_id, company=company)
 
+    ############################################### DELETE CLIENT #####################################################
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_management")
@@ -112,6 +117,7 @@ class ClientController(CRUDMixin):
 
         return self.delete(Client, client_id)
 
+    ############################################### LIST CLIENTS ######################################################
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial", "is_management", "is_support")

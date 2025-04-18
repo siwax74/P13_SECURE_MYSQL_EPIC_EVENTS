@@ -19,8 +19,9 @@ class ContractController(CRUDMixin):
         self.authenticated_user = main_view.authenticated_user
         self.base_view = base_view
 
-    @BasePermissions.check_permission("is_commercial", "is_management")
+    ############################################### MENU CONTRACTS ####################################################
     @Decorator.with_banner
+    @BasePermissions.check_permission("is_commercial", "is_management")
     def handle_contract_menu(self):
         while True:
             choice = self.contract_view.print_contract_menu()
@@ -41,6 +42,7 @@ class ContractController(CRUDMixin):
             else:
                 print("❌ Choix invalide.")
 
+    ############################################### CREATE CONTRACT ###################################################
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial", "is_management")
@@ -69,6 +71,7 @@ class ContractController(CRUDMixin):
         )
         print(f"✅ Contrat créé avec succès pour le client {client_id}.")
 
+    ############################################### UPDATE CONTRACT ###################################################
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial", "is_management")
@@ -104,6 +107,7 @@ class ContractController(CRUDMixin):
         elif remaining_amount:
             raise ValueError("❌ Montant restant invalide.")
 
+    ############################################### DELETE CONTRACT ###################################################
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_management")
@@ -117,6 +121,7 @@ class ContractController(CRUDMixin):
 
         self.delete(Contract, contract_id)
 
+    ############################################### LIST CONTRACTS ####################################################
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial", "is_management", "is_support")

@@ -17,6 +17,9 @@ class UserController(CRUDMixin):
         self.user_view = UserView(main_view)
         self.authenticated_user = main_view.authenticated_user
 
+    ############################################### MENU USER #########################################################
+    @Decorator.with_banner
+    @BasePermissions.check_permission("is_commercial", "is_management")
     def handle_user_menu(self):
         while True:
             choice = self.user_view.print_user_menu()
@@ -37,7 +40,10 @@ class UserController(CRUDMixin):
             else:
                 print("❌ Choix invalide.")
 
+    ############################################### CREATE USER #######################################################
+    @Decorator.with_banner
     @Decorator.safe_execution
+    @BasePermissions.check_permission("is_management")
     def create_user(self):
         username, email, password, is_management, is_commercial, is_support = self.user_view.print_create_user_view()
 
@@ -63,6 +69,8 @@ class UserController(CRUDMixin):
 
         return hashed_password.decode("utf-8")
 
+    ############################################### UPDATE USER #######################################################
+    @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_management")
     def update_user(self):
@@ -91,6 +99,8 @@ class UserController(CRUDMixin):
 
         print(f"✅ Utilisateur '{user.username}' mis à jour.")
 
+    ############################################### DELETE USER #######################################################
+    @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_management")
     def delete_user(self):
@@ -104,7 +114,10 @@ class UserController(CRUDMixin):
         self.delete(User, user_id)
         print(f"✅ Utilisateur '{user.username}' supprimé.")
 
+    ############################################### LIST USER #########################################################
+    @Decorator.with_banner
     @Decorator.safe_execution
+    @BasePermissions.check_permission("is_management")
     def list_users(self):
         users = self.list(User)
         self.user_view.print_user_list_view(users)

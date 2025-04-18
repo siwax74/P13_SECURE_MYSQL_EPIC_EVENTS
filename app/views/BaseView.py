@@ -4,7 +4,7 @@ import getpass
 
 class BaseView:
 
-    CLI_VERSION = "0.0.1"
+    CLI_VERSION = "1.0.0"
     AUTHOR = "Siwax74"
     COPYRIGHT = "2025 Epic_Events"
 
