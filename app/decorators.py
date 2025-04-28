@@ -5,7 +5,7 @@ from functools import wraps
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.controllers.token import ObtainToken, RefreshToken
+from app.tokens import ObtainToken, RefreshToken
 
 
 class Decorator:

@@ -5,13 +5,6 @@ from datetime import datetime, timedelta
 from app.models.user import User
 from sqlalchemy.orm import Session
 
-SECRET_KEY = "super_secret_key"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-REFRESH_TOKEN_EXPIRE_DAYS = 7
-TOKEN_FILE_PATH = "token.jwt"
-
-
 class ObtainToken:
     def __init__(self, session: Session, user: User):
         self.session = session

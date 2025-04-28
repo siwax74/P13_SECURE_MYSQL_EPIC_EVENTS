@@ -1,6 +1,6 @@
 from datetime import datetime
 import os
-from app.controllers.token import ObtainToken, RefreshToken
+from app.tokens import ObtainToken, RefreshToken
 from app.models.user import User
 from app.views.BaseView import BaseView
 from app.controllers.main_controller import MainController
