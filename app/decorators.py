@@ -1,8 +1,11 @@
+from datetime import datetime
 import time
 import sentry_sdk
 from functools import wraps
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+
+from app.controllers.token import ObtainToken, RefreshToken
 
 
 class Decorator:
@@ -21,10 +24,27 @@ class Decorator:
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             try:
+                if hasattr(self, "authenticated_user"):
+                    token_manager = ObtainToken(self.session, self.authenticated_user)
+                    stored_token = token_manager.get_stored_tokens()
+
+                    if stored_token:
+                        expires_at = datetime.fromisoformat(stored_token["expires_at"])
+                        if expires_at < datetime.now():
+                            print("\n🔄 Token expiré, tentative de rafraîchissement...")
+                            refresh_manager = RefreshToken(
+                                self.session, self.authenticated_user, stored_token["refresh_token"]
+                            )
+                            refresh_manager.update_token()
+                    else:
+                        print("\n❌ Aucun token trouvé, création d'un nouveau...")
+                        token_manager.create_tokens()
+
                 result = func(self, *args, **kwargs)
                 if result is None:
                     time.sleep(1)
                 return result
+
             except KeyboardInterrupt:
                 print("\n🛑 Interruption du programme.")
             except SQLAlchemyError as e:

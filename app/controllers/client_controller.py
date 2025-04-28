@@ -4,6 +4,7 @@ from app.models.user import User
 from app.permissions import BasePermissions
 from app.views.client_view import ClientView
 from app.decorators import Decorator
+from app.regex import is_valid_company, is_valid_email, is_valid_name, is_valid_phone
 
 
 #######################################################################################################################
@@ -48,23 +49,22 @@ class ClientController(CRUDMixin):
     def create_client(self):
         name, email, phone, company = self.client_view.print_create_client_view()
 
-        # Check each argument individually
-        if not name:
+        if not name or not is_valid_name(name):
             print("❌ Le champ 'Nom' est obligatoire.")
             return None
-        if not email:
+        if not email or not is_valid_email(email):
             print("❌ Le champ 'Email' est obligatoire.")
             return None
-        if not phone:
+        if not phone or not is_valid_phone(phone):
             print("❌ Le champ 'Téléphone' est obligatoire.")
             return None
-        if not company:
+        if not company or not is_valid_company(company):
             print("❌ Le champ 'Entreprise' est obligatoire.")
             return None
 
-        contact_commercial = self.session.query(User).filter_by(is_commercial=True).first()
-        if not contact_commercial:
-            print("❌ Aucun commercial disponible.")
+        contact_commercial = self.authenticated_user
+        if not contact_commercial or not contact_commercial.is_commercial:
+            print("❌ Seul un commercial peut créer un client.")
             return None
 
         return self.create(
@@ -83,24 +83,27 @@ class ClientController(CRUDMixin):
         if not client:
             print("❌ Client introuvable.")
             return None
+        if client.contact_commercial_id != self.authenticated_user.id:
+            print("❌ Vous ne pouvez modifier que vos propres clients.")
+            return None
 
         name, email, phone, company = self.client_view.print_update_client_form()
-        if not name:
-            return None
+
+        update_data = {}
+        if is_valid_name(name):
+            update_data["name"] = name
+        if is_valid_email(email):
+            update_data["email"] = email
+        if is_valid_phone(phone):
+            update_data["phone"] = phone
+        if is_valid_company(company):
+            update_data["company"] = company
+
+        if update_data:
+            self.update(Client, client_id, **update_data)
         else:
-            self.update(Client, client_id, name=name)
-        if not email:
-            return None
-        else:
-            self.update(Client, client_id, email=email)
-        if not phone:
-            return None
-        else:
-            self.update(Client, client_id, phone=phone)
-        if not company:
-            return None
-        else:
-            self.update(Client, client_id, company=company)
+            print("⚠️ Aucun champ à mettre à jour.")
+        return None
 
     ############################################### DELETE CLIENT #####################################################
     @Decorator.with_banner

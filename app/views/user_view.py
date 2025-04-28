@@ -35,7 +35,7 @@ class UserView:
 
     def print_create_user_view(self):
         """Affiche le formulaire pour créer un utilisateur."""
-        self.print_welcome_message()
+        self.main_view.print_welcome_message()
         username = input("Nom d'utilisateur : ")
         email = input("Adresse email : ")
         password = input("Mot de passe : ")
@@ -48,7 +48,7 @@ class UserView:
 
     def print_update_user_view(self, users):
         """Demande quel utilisateur modifier."""
-        self.print_welcome_message()
+        self.main_view.print_welcome_message()
         print("\n📋 Liste des utilisateurs :")
         for user in users:
             print(f"{user.id} - {user.username} ({user.email})")
@@ -57,7 +57,7 @@ class UserView:
 
     def print_update_user_form(self):
         """Affiche le formulaire pour modifier un utilisateur."""
-        self.print_welcome_message()
+        self.main_view.print_welcome_message()
         username = input("Nouveau nom d'utilisateur (laisser vide pour ne pas modifier) : ")
         email = input("Nouvelle adresse email (laisser vide pour ne pas modifier) : ")
         password = input("Nouveau mot de passe (laisser vide pour ne pas modifier) : ")
@@ -75,7 +75,7 @@ class UserView:
 
     def print_delete_user_view(self, users):
         """Demande quel utilisateur supprimer."""
-        self.print_welcome_message()
+        self.main_view.print_welcome_message()
         print("\n🗑️ Liste des utilisateurs à supprimer :")
         for user in users:
             print(f"{user.id} - {user.username} ({user.email})")

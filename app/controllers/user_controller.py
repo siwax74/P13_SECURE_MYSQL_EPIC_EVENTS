@@ -3,6 +3,7 @@ from app.decorators import Decorator
 from app.mixins import CRUDMixin
 from app.models.user import User
 from app.permissions import BasePermissions
+from app.regex import is_valid_email, is_valid_id, is_valid_password, is_valid_username
 from app.views.user_view import UserView
 
 
@@ -47,8 +48,15 @@ class UserController(CRUDMixin):
     def create_user(self):
         username, email, password, is_management, is_commercial, is_support = self.user_view.print_create_user_view()
 
-        if not all([username, email, password]):
-            raise ValueError("❌ Les champs 'username', 'email' et 'mot de passe' sont obligatoires.")
+        if not is_valid_username:
+            print("❌ Veuillez renseigner un nom d'utilisateur.")
+            return None
+        if not is_valid_email:
+            print("❌ Veuillez renseigner une adresse e-mail.")
+            return None
+        if not is_valid_password:
+            print("❌ Veuillez renseigner un mot de passe.")
+            return None
 
         password_hash = self.generate_hashed_password(password)
 
@@ -61,12 +69,10 @@ class UserController(CRUDMixin):
             is_commercial=is_commercial,
             is_support=is_support,
         )
-        print(f"✅ Utilisateur '{username}' créé avec succès.")
 
-    def generate_hashed_password(plain_password: str):
+    def generate_hashed_password(self, plain_password: str):
         salt = bcrypt.gensalt()
         hashed_password = bcrypt.hashpw(plain_password.encode("utf-8"), salt)
-
         return hashed_password.decode("utf-8")
 
     ############################################### UPDATE USER #######################################################
@@ -76,28 +82,36 @@ class UserController(CRUDMixin):
     def update_user(self):
         users = self.list(User)
         user_id = self.user_view.print_update_user_view(users)
+        if not is_valid_id(user_id):
+            print("❌ ID utilisateur invalide.")
+            return None
 
         user = self.session.get(User, user_id)
         if not user:
-            raise ValueError("❌ Utilisateur introuvable.")
+            print("❌ Utilisateur non trouvé.")
+            return None
 
-        username, email, password, is_management, is_commercial, is_support = self.main_view.print_update_user_form()
+        username, email, password, is_management, is_commercial, is_support = self.user_view.print_update_user_form()
 
-        if username:
-            self.update(User, user_id, username=username)
-        if email:
-            self.update(User, user_id, email=email)
-        if password:
-            password_hash = self.generate_hashed_password(password)
-            self.update(User, user_id, password_hash=password_hash)
+        update_data = {}
+        if is_valid_username(username):
+            update_data["username"] = username
+        if is_valid_email(email):
+            update_data["email"] = email
+        if is_valid_password(password):
+            update_data["password_hash"] = self.generate_hashed_password(password)
         if is_management is not None:
-            self.update(User, user_id, is_management=is_management)
+            update_data["is_management"] = is_management
         if is_commercial is not None:
-            self.update(User, user_id, is_commercial=is_commercial)
+            update_data["is_commercial"] = is_commercial
         if is_support is not None:
-            self.update(User, user_id, is_support=is_support)
+            update_data["is_support"] = is_support
 
-        print(f"✅ Utilisateur '{user.username}' mis à jour.")
+        if update_data:
+            self.update(User, user_id, **update_data)
+        else:
+            print("⚠️ Aucun champ à mettre à jour.")
+        return None
 
     ############################################### DELETE USER #######################################################
     @Decorator.with_banner
@@ -106,18 +120,24 @@ class UserController(CRUDMixin):
     def delete_user(self):
         users = self.list(User)
         user_id = self.user_view.print_delete_user_view(users)
+        if not is_valid_id(user_id):
+            print("❌ ID utilisateur invalide.")
+            return None
 
         user = self.session.get(User, user_id)
         if not user:
-            raise ValueError("❌ Utilisateur introuvable.")
+            print("❌ Utilisateur introuvable.")
+            return None
 
         self.delete(User, user_id)
-        print(f"✅ Utilisateur '{user.username}' supprimé.")
 
     ############################################### LIST USER #########################################################
     @Decorator.with_banner
     @Decorator.safe_execution
-    @BasePermissions.check_permission("is_management")
+    @BasePermissions.check_permission("is_commercial", "is_management")
     def list_users(self):
         users = self.list(User)
-        self.user_view.print_user_list_view(users)
+        if not users:
+            print("❌ Aucun utilisateur trouvé.")
+            return None
+        return self.user_view.print_user_list_view(users)

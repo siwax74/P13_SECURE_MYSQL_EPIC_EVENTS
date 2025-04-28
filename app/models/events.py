@@ -12,15 +12,10 @@ class Event(Base):
     title: Mapped[str] = mapped_column(String, nullable=False)
     id: Mapped[int] = mapped_column(primary_key=True, unique=True)
     contract_id: Mapped[int] = mapped_column(Integer)
-
-    # Foreign keys
     client_id: Mapped[int] = mapped_column(ForeignKey("clients.id"))
     support_contact_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-
-    # Relationships
     client: Mapped[Optional["Client"]] = relationship("Client")
     support_contact: Mapped[Optional["User"]] = relationship("User")
-
     start_datetime: Mapped[datetime] = mapped_column(DateTime)
     end_datetime: Mapped[datetime] = mapped_column(DateTime)
     location: Mapped[str] = mapped_column(String)

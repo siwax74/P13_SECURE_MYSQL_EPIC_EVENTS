@@ -6,6 +6,7 @@ from app.models.contract import Contract
 from app.models.user import User
 from app.permissions import BasePermissions
 from app.views.contract_view import ContractView
+from app.regex import is_valid_amount, is_valid_id
 
 
 #######################################################################################################################
@@ -41,6 +42,7 @@ class ContractController(CRUDMixin):
                 action()
             else:
                 print("❌ Choix invalide.")
+                return None
 
     ############################################### CREATE CONTRACT ###################################################
     @Decorator.with_banner
@@ -49,19 +51,26 @@ class ContractController(CRUDMixin):
     def create_contract(self):
         client_id, total_amount, commercial_id, remaining_amount = self.contract_view.print_create_contract_view()
 
-        if not all([client_id, total_amount, commercial_id, remaining_amount]):
-            raise ValueError("❌ Tous les champs doivent être remplis.")
-
-        if not self.is_valid_amount(total_amount) or not self.is_valid_amount(remaining_amount):
-            raise ValueError("❌ Les montants doivent être des nombres valides.")
+        if not client_id or not total_amount or not commercial_id or not remaining_amount:
+            print("❌ Tous les champs sont obligatoires.")
+            return None
 
         client = self.session.get(Client, client_id)
         commercial = self.session.get(User, commercial_id)
 
-        if not client or not commercial:
-            raise ValueError("❌ Client ou commercial introuvable.")
+        if not client:
+            print("❌ Le client n'a pas été trouvé.")
+            return None
+        if not commercial:
+            print("❌ Le commercial n'a pas été trouvé.")
+            return None
 
-        self.create(
+        # Vérifie que le commercial connecté crée un contrat pour son propre client
+        if self.authenticated_user.is_commercial and client.contact_commercial_id != self.authenticated_user.id:
+            print("❌ Vous ne pouvez créer des contrats que pour vos clients.")
+            return None
+
+        return self.create(
             Contract,
             client_information=client,
             contact_commercial=commercial,
@@ -69,68 +78,73 @@ class ContractController(CRUDMixin):
             remaining_amount=remaining_amount,
             signed=False,
         )
-        print(f"✅ Contrat créé avec succès pour le client {client_id}.")
 
     ############################################### UPDATE CONTRACT ###################################################
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial", "is_management")
     def update_contract(self):
-        contracts = self.session.query(Contract).all()
+        contracts = self.list(Contract)
         contract_id = self.contract_view.print_update_contract_view(contracts)
-
+        if not is_valid_id(contract_id):
+            print("❌ Invalid contract ID.")
+            return None
         contract = self.session.get(Contract, contract_id)
         if not contract:
-            raise ValueError("❌ Contrat introuvable.")
+            print("❌ Le contrat n'a pas été trouvé.")
+            return None
+
+        if self.authenticated_user.is_commercial and contract.contact_commercial_id != self.authenticated_user.id:
+            print("❌ Vous ne pouvez modifier que les contrats de vos clients.")
+            return None
 
         client_id, commercial_id, total_amount, remaining_amount = self.contract_view.print_update_contract_form()
 
-        if client_id:
+        update_data = {}
+        if is_valid_id(client_id):
             client = self.session.get(Client, client_id)
-            if not client:
-                raise ValueError("❌ Client non trouvé.")
-            self.update(Contract, contract_id, client_information=client)
-
-        if commercial_id:
+            if client:
+                update_data["client_information"] = client
+        if is_valid_id(commercial_id):
             commercial = self.session.get(User, commercial_id)
-            if not commercial:
-                raise ValueError("❌ Commercial non trouvé.")
-            self.update(Contract, contract_id, contact_commercial=commercial)
+            if commercial:
+                update_data["contact_commercial"] = commercial
+        if total_amount and is_valid_amount(total_amount):
+            update_data["total_amount"] = total_amount
+        if remaining_amount and is_valid_amount(remaining_amount):
+            update_data["remaining_amount"] = remaining_amount
 
-        if total_amount and self.is_valid_amount(total_amount):
-            self.update(Contract, contract_id, total_amount=total_amount)
-        elif total_amount:
-            raise ValueError("❌ Montant total invalide.")
-
-        if remaining_amount and self.is_valid_amount(remaining_amount):
-            self.update(Contract, contract_id, remaining_amount=remaining_amount)
-        elif remaining_amount:
-            raise ValueError("❌ Montant restant invalide.")
+        if update_data:
+            self.update(Contract, contract_id, **update_data)
+        else:
+            print("❌ Aucune modification n'a été effectuée.")
+        return None
 
     ############################################### DELETE CONTRACT ###################################################
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_management")
     def delete_contract(self):
-        contracts = self.session.query(Contract).all()
+        contracts = self.list(Contract)
         contract_id = self.contract_view.print_delete_contract_view(contracts)
+        if not is_valid_id(contract_id):
+            print("❌ Invalid contract ID.")
+            return None
 
         contract = self.session.get(Contract, contract_id)
         if not contract:
-            raise ValueError("❌ Contrat introuvable.")
+            print("❌ Contrat introuvable.")
+            return None
 
-        self.delete(Contract, contract_id)
+        return self.delete(Contract, contract_id)
 
     ############################################### LIST CONTRACTS ####################################################
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial", "is_management", "is_support")
     def list_contracts(self):
-        contracts = self.session.query(Contract).all()
-        self.contract_view.print_contract_list_view(contracts)
-
-    def is_valid_amount(self, value):
-        try:
-            return bool(re.match(r"^\d+(\.\d{1,2})?$", str(value)))
-        except ValueError:
-            return False
+        contracts = self.list(Contract)
+        if not contracts:
+            print("❌ Aucun contrat n'a été trouvé.")
+            return None
+        return self.contract_view.print_contract_list_view(contracts)

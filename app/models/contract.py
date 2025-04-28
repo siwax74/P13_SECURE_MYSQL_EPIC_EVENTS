@@ -11,15 +11,10 @@ class Contract(Base):
     __tablename__ = "contracts"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-
-    # Relation avec Client pour stocker les informations du client
     client_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("clients.id"))
     client_information: Mapped[Optional["Client"]] = relationship("Client")
-
-    # Relation avec User pour le commercial
     contact_commercial_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("users.id"))
     contact_commercial: Mapped[Optional["User"]] = relationship("User")
-
     total_amount: Mapped[float] = mapped_column(Float, nullable=False)
     remaining_amount: Mapped[float] = mapped_column(Float, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))

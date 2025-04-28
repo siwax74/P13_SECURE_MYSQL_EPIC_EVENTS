@@ -5,6 +5,7 @@ from app.controllers.event_controller import EventController
 from app.controllers.user_controller import UserController
 from app.decorators import Decorator
 from app.mixins import CRUDMixin
+from app.views.BaseView import BaseView
 from app.views.main_view import MainView
 
 
@@ -23,10 +24,10 @@ class MainController(CRUDMixin):
         self.event_controller = EventController(session, self.main_view, base_view)
 
     ############################################### MENU MAIN #########################################################
-    @Decorator.with_banner
     @Decorator.safe_execution
     def run(self):
         while True:
+            self.base_view.print_banner()
             choice = self.main_view.print_main_view()
 
             menu_actions = {

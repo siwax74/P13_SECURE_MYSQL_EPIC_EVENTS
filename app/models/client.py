@@ -18,8 +18,6 @@ class Client(Base):
     updated_at: Mapped[DateTime] = mapped_column(
         DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc)
     )
-
-    # Relation avec User
     contact_commercial_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("users.id"))
     contact_commercial: Mapped[Optional["User"]] = relationship("User")
 

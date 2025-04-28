@@ -11,7 +11,7 @@ class EventView:
 
     def print_event_menu(self):
         """Affiche le menu des événements et affiche un message de bienvenue."""
-        self.print_welcome_message()
+        self.main_view.print_welcome_message()
         print("\nMenu des événements :")
         print("1️⃣ - Liste des événements")
         print("2️⃣ - Ajouter un événement")
@@ -23,7 +23,7 @@ class EventView:
 
     def print_events_list_view(self, events):
         """Affiche la liste des événements."""
-        self.print_welcome_message()
+        self.main_view.print_welcome_message()
         print("\n📋 Liste des événements 📋")
         for event in events:
             print(f"🔹 ID Événement       : {event.event_id}")
@@ -40,7 +40,7 @@ class EventView:
 
     def print_create_event_view(self):
         """Affiche le formulaire pour créer un nouvel événement."""
-        self.print_welcome_message()
+        self.main_view.print_welcome_message()
         title = input("Titre de l'événement : ")
         client_id = input("ID du client : ")
         support_contact_id = input("ID du support contact : ")
@@ -55,14 +55,14 @@ class EventView:
 
     def print_update_event_view(self):
         """Affiche la liste des événements et demande l'ID de l'événement à modifier."""
-        self.print_welcome_message()
+        self.main_view.print_welcome_message()
         print("\n📋 Liste des événements :\n")
         event_id = input("Veuillez entrer l'ID de l'événement à modifier: ")
         return int(event_id)
 
     def print_update_event_form(self):
         """Affiche le formulaire pour modifier un événement."""
-        self.print_welcome_message()
+        self.main_view.print_welcome_message()
         title = input("Nouveau titre de l'événement : ")
         client_id = input("Nouveau ID du client : ")
         support_contact_id = input("Nouveau ID du support contact : ")
@@ -71,8 +71,6 @@ class EventView:
         location = input("Nouveau lieu de l'événement : ")
         attendees = input("Nouveau nombre d'invités : ")
         notes = input("Nouvelles notes : ")
-
-        # Convertir les dates et heures en objet datetime
         start_datetime = datetime.strptime(start_datetime, "%d/%m/%Y %H:%M")
         end_datetime = datetime.strptime(end_datetime, "%d/%m/%Y %H:%M")
 
@@ -80,7 +78,7 @@ class EventView:
 
     def print_delete_event_view(self):
         """Affiche la liste des événements et demande l'ID de l'événement à supprimer."""
-        self.print_welcome_message()
+        self.main_view.print_welcome_message()
         print("\n📋 Liste des événements :\n")
         event_id = input("Veuillez entrer l'ID de l'événement à supprimer: ")
         return int(event_id)
