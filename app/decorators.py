@@ -27,7 +27,6 @@ class Decorator:
                 if hasattr(self, "authenticated_user"):
                     token_manager = ObtainToken(self.session, self.authenticated_user)
                     stored_token = token_manager.get_stored_tokens()
-
                     if stored_token:
                         expires_at = datetime.fromisoformat(stored_token["expires_at"])
                         if expires_at < datetime.now():

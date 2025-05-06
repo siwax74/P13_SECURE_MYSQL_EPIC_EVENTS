@@ -12,18 +12,10 @@ class Contract(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     client_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("clients.id"))
-    client_information: Mapped[Optional["Client"]] = relationship("Client")
+    client: Mapped[Optional["Client"]] = relationship("Client")
     contact_commercial_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("users.id"))
     contact_commercial: Mapped[Optional["User"]] = relationship("User")
     total_amount: Mapped[float] = mapped_column(Float, nullable=False)
     remaining_amount: Mapped[float] = mapped_column(Float, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
     signed: Mapped[bool] = mapped_column(Boolean, default=False)
-
-    def __repr__(self) -> str:
-        return (
-            f"Contract(id={self.id}, client={self.client_information.name}, "
-            f"commercial={self.contact_commercial.name}, total_amount={self.total_amount}, "
-            f"remaining_amount={self.remaining_amount}, created_at={self.created_at}, "
-            f"signed={self.signed})"
-        )

@@ -21,3 +21,5 @@ env/
 Thumbs.db
 
 *.jwt
+*.coverage
+*.pytest_cache

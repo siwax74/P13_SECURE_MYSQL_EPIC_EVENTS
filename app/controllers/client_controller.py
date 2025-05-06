@@ -5,27 +5,35 @@ from app.permissions import BasePermissions
 from app.views.client_view import ClientView
 from app.decorators import Decorator
 from app.regex import is_valid_company, is_valid_email, is_valid_name, is_valid_phone
+from typing import Optional, Any
+from sqlalchemy.orm import Session
 
 
 #######################################################################################################################
 #                                                    CLIENTS                                                          #
 #######################################################################################################################
 class ClientController(CRUDMixin):
-    def __init__(self, session, main_view, base_view):
+    def __init__(self, session: Session, main_view: Any, base_view: Any) -> None:
+        """
+        Initialise le contrôleur de client avec la session, la vue principale et la vue de base.
+        """
         super().__init__(session)
         self.base_view = base_view
         self.main_view = main_view
         self.client_view = ClientView(main_view)
         self.authenticated_user = main_view.authenticated_user
 
-    ############################################### MENU CLIENT #######################################################
     @Decorator.with_banner
     @BasePermissions.check_permission("is_commercial", "is_management")
-    def handle_client_menu(self):
+    def handle_client_menu(self) -> None:
+        """
+        Gère le menu principal des clients avec différentes options (lister, créer, modifier, supprimer).
+        Accessible uniquement aux utilisateurs commerciaux ou managers.
+        """
         while True:
-            choice = self.client_view.print_client_menu()
+            choice: str = self.client_view.print_client_menu()
 
-            actions = {
+            actions: dict[str, Optional[Any]] = {
                 "1": self.list_clients,
                 "2": self.create_client,
                 "3": self.update_client,
@@ -42,11 +50,18 @@ class ClientController(CRUDMixin):
                 print("❌ Choix invalide.")
                 return None
 
-    ############################################### CREATE CLIENT #####################################################
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial")
-    def create_client(self):
+    def create_client(self) -> Optional[Client]:
+        """
+        Crée un nouveau client à partir des informations saisies par l'utilisateur.
+        Vérifie les permissions, la validité des champs, et assigne le commercial courant comme contact.
+        """
+        name: str
+        email: str
+        phone: str
+        company: str
         name, email, phone, company = self.client_view.print_create_client_view()
 
         if not name or not is_valid_name(name):
@@ -62,24 +77,32 @@ class ClientController(CRUDMixin):
             print("❌ Le champ 'Entreprise' est obligatoire.")
             return None
 
-        contact_commercial = self.authenticated_user
+        contact_commercial: Optional[User] = self.authenticated_user
         if not contact_commercial or not contact_commercial.is_commercial:
             print("❌ Seul un commercial peut créer un client.")
             return None
 
         return self.create(
-            Client, name=name, email=email, phone=phone, company=company, contact_commercial=contact_commercial
+            Client,
+            name=name,
+            email=email,
+            phone=phone,
+            company=company,
+            contact_commercial=contact_commercial,
         )
 
-    ############################################### UPDATE CLIENT #####################################################
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial")
-    def update_client(self):
-        clients = self.list(Client)
-        client_id = self.client_view.print_update_client_view(clients)
+    def update_client(self) -> Optional[None]:
+        """
+        Met à jour les informations d’un client existant appartenant au commercial authentifié.
+        Affiche un formulaire, vérifie les droits, et applique les changements validés.
+        """
+        clients: list[Client] = self.list(Client)
+        client_id: int = self.client_view.print_update_client_view(clients)
 
-        client = self.session.get(Client, client_id)
+        client: Optional[Client] = self.session.get(Client, client_id)
         if not client:
             print("❌ Client introuvable.")
             return None
@@ -89,7 +112,7 @@ class ClientController(CRUDMixin):
 
         name, email, phone, company = self.client_view.print_update_client_form()
 
-        update_data = {}
+        update_data: dict[str, Any] = {}
         if is_valid_name(name):
             update_data["name"] = name
         if is_valid_email(email):
@@ -105,27 +128,33 @@ class ClientController(CRUDMixin):
             print("⚠️ Aucun champ à mettre à jour.")
         return None
 
-    ############################################### DELETE CLIENT #####################################################
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_management")
-    def delete_client(self):
-        clients = self.list(Client)
-        client_id = self.client_view.print_delete_client_view(clients)
+    def delete_client(self) -> Optional[None]:
+        """
+        Supprime un client de la base de données après sélection.
+        Seuls les utilisateurs ayant les droits de management peuvent effectuer cette opération.
+        """
+        clients: list[Client] = self.list(Client)
+        client_id: int = self.client_view.print_delete_client_view(clients)
 
-        client = self.session.get(Client, client_id)
+        client: Optional[Client] = self.session.get(Client, client_id)
         if not client:
             print("❌ Client introuvable.")
             return None
 
         return self.delete(Client, client_id)
 
-    ############################################### LIST CLIENTS ######################################################
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial", "is_management", "is_support")
-    def list_clients(self):
-        clients = self.list(Client)
+    def list_clients(self) -> Optional[None]:
+        """
+        Affiche la liste des clients existants.
+        Disponible pour tous les rôles autorisés : commerciaux, support et management.
+        """
+        clients: list[Client] = self.list(Client)
         if not clients:
             print("❌ Aucun client trouvé.")
             return None

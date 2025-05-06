@@ -5,13 +5,26 @@ from app.models.user import User
 from app.permissions import BasePermissions
 from app.regex import is_valid_email, is_valid_id, is_valid_password, is_valid_username
 from app.views.user_view import UserView
+from typing import Optional, List
 
 
 #######################################################################################################################
 #                                                    UTILISATEUR                                                      #
 #######################################################################################################################
 class UserController(CRUDMixin):
-    def __init__(self, session, main_view, base_view):
+    """
+    Contrôleur gérant les opérations sur les utilisateurs : création, mise à jour, suppression et liste.
+    """
+
+    def __init__(self, session, main_view, base_view) -> None:
+        """
+        Initialise le contrôleur des utilisateurs.
+
+        Args:
+            session (Session): Session SQLAlchemy pour les requêtes à la base de données.
+            main_view (MainView): Vue principale qui affiche les menus et les informations.
+            base_view (BaseView): Vue de base utilisée pour l'affichage.
+        """
         super().__init__(session)
         self.base_view = base_view
         self.main_view = main_view
@@ -21,7 +34,10 @@ class UserController(CRUDMixin):
     ############################################### MENU USER #########################################################
     @Decorator.with_banner
     @BasePermissions.check_permission("is_commercial", "is_management")
-    def handle_user_menu(self):
+    def handle_user_menu(self) -> None:
+        """
+        Gère le menu utilisateur. Permet de choisir les actions à réaliser sur les utilisateurs.
+        """
         while True:
             choice = self.user_view.print_user_menu()
 
@@ -45,16 +61,21 @@ class UserController(CRUDMixin):
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_management")
-    def create_user(self):
+    def create_user(self) -> None:
+        """
+        Crée un nouvel utilisateur après validation des données.
+
+        Vérifie que les données saisies sont valides et génère un mot de passe haché avant de créer l'utilisateur.
+        """
         username, email, password, is_management, is_commercial, is_support = self.user_view.print_create_user_view()
 
-        if not is_valid_username:
+        if not is_valid_username(username):
             print("❌ Veuillez renseigner un nom d'utilisateur.")
             return None
-        if not is_valid_email:
+        if not is_valid_email(email):
             print("❌ Veuillez renseigner une adresse e-mail.")
             return None
-        if not is_valid_password:
+        if not is_valid_password(password):
             print("❌ Veuillez renseigner un mot de passe.")
             return None
 
@@ -70,7 +91,16 @@ class UserController(CRUDMixin):
             is_support=is_support,
         )
 
-    def generate_hashed_password(self, plain_password: str):
+    def generate_hashed_password(self, plain_password: str) -> str:
+        """
+        Génère un mot de passe haché à partir d'un mot de passe en clair.
+
+        Args:
+            plain_password (str): Mot de passe en clair à hacher.
+
+        Returns:
+            str: Mot de passe haché.
+        """
         salt = bcrypt.gensalt()
         hashed_password = bcrypt.hashpw(plain_password.encode("utf-8"), salt)
         return hashed_password.decode("utf-8")
@@ -79,7 +109,12 @@ class UserController(CRUDMixin):
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_management")
-    def update_user(self):
+    def update_user(self) -> None:
+        """
+        Met à jour les informations d'un utilisateur existant.
+
+        Vérifie les valeurs saisies avant de mettre à jour l'utilisateur.
+        """
         users = self.list(User)
         user_id = self.user_view.print_update_user_view(users)
         if not is_valid_id(user_id):
@@ -117,7 +152,10 @@ class UserController(CRUDMixin):
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_management")
-    def delete_user(self):
+    def delete_user(self) -> None:
+        """
+        Supprime un utilisateur existant après validation de son ID.
+        """
         users = self.list(User)
         user_id = self.user_view.print_delete_user_view(users)
         if not is_valid_id(user_id):
@@ -135,7 +173,13 @@ class UserController(CRUDMixin):
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial", "is_management")
-    def list_users(self):
+    def list_users(self) -> Optional[List[User]]:
+        """
+        Liste tous les utilisateurs de la base de données et les affiche.
+
+        Returns:
+            Optional[List[User]]: Liste des utilisateurs, ou None si aucun utilisateur n'est trouvé.
+        """
         users = self.list(User)
         if not users:
             print("❌ Aucun utilisateur trouvé.")

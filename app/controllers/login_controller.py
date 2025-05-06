@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+from typing import Optional
 from app.tokens import ObtainToken, RefreshToken
 from app.models.user import User
 from app.views.BaseView import BaseView
@@ -23,7 +24,14 @@ sentry_sdk.init(
 #                                                    LOGIN                                                            #
 #######################################################################################################################
 class LoginController:
-    def __init__(self):
+    """
+    Contrôleur gérant la connexion de l'utilisateur à l'application.
+    """
+
+    def __init__(self) -> None:
+        """
+        Initialise le contrôleur de connexion, la base view, la session SQLAlchemy et le moteur.
+        """
         self.base_view = BaseView()
         self.engine = create_engine(DATABASE_URL, echo=False)
         Session = sessionmaker(bind=self.engine)
@@ -31,25 +39,40 @@ class LoginController:
 
     @Decorator.with_banner
     @Decorator.safe_execution
-    def run(self):
+    def run(self) -> None:
+        """
+        Démarre la boucle de connexion. Redirige vers le contrôleur principal en cas de succès.
+        """
         while True:
+            email: str
+            password: str
             email, password = self.base_view.print_login_form()
-            authenticated_user = self.authenticate_user(email, password)
+            authenticated_user: Optional[User] = self.authenticate_user(email, password)
             if authenticated_user:
                 self.main_controller = MainController(self.session, authenticated_user, self.base_view)
                 return self.main_controller.run()
 
     @Decorator.safe_execution
-    def authenticate_user(self, email, password):
-        """Vérifie si l'utilisateur existe et si le mot de passe est correct."""
+    def authenticate_user(self, email: str, password: str) -> Optional[User]:
+        """
+        Authentifie un utilisateur via son email et son mot de passe.
+
+        Args:
+            email (str): Email de l'utilisateur.
+            password (str): Mot de passe en clair.
+
+        Returns:
+            Optional[User]: Utilisateur authentifié ou None si échec.
+        """
         if not is_valid_email(email):
             print("\n❌ Invalid Email !.")
             return None
+
         if not password:
             print("\n❌ Invalid Password !.")
             return None
 
-        user = self.session.query(User).filter_by(email=email).first()
+        user: Optional[User] = self.session.query(User).filter_by(email=email).first()
         if not user:
             print("\n❌ Utilisateur non trouvé.")
             return None
@@ -57,9 +80,11 @@ class LoginController:
         if bcrypt.checkpw(password.encode(), user.password_hash.encode()):
             token_manager = ObtainToken(self.session, user)
             stored_token = token_manager.get_stored_tokens()
+
             if stored_token and stored_token.get("user") != email:
                 print("\n⚠️ Utilisateur différent détecté, création d'un nouveau token.")
                 token_manager.create_tokens()
+
             elif stored_token:
                 if datetime.fromisoformat(stored_token["expires_at"]) < datetime.now():
                     refresh_manager = RefreshToken(self.session, user, stored_token["refresh_token"])
