@@ -37,29 +37,36 @@ def is_valid_amount(self, value):
     except ValueError:
         return False
 
+
 @staticmethod
 def is_valid_title(title):
     return bool(re.match(r"^.{1,255}$", title))
+
 
 @staticmethod
 def is_valid_datetime(value):
     return bool(re.match(r"^\d{2}/\d{2}/\d{4} \d{2}:\d{2}$", value))
 
+
 @staticmethod
 def is_valid_location(location):
     return bool(re.match(r"^.{1,255}$", location))
+
 
 @staticmethod
 def is_valid_attendees(attendees):
     return bool(re.match(r"^\d+$", str(attendees)))
 
+
 @staticmethod
 def is_valid_notes(notes):
     return bool(re.match(r"^.{0,1000}$", notes))
 
+
 @staticmethod
 def is_valid_username(username: str) -> bool:
     return bool(re.match(r"^[a-zA-Z0-9_.-]{3,20}$", username))
+
 
 @staticmethod
 def is_valid_password(password: str) -> bool:

@@ -146,7 +146,6 @@ class EventController(CRUDMixin):
             notes=notes,
         )
 
-
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_support", "is_management")

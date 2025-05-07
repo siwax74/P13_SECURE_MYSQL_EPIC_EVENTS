@@ -4,6 +4,7 @@ from datetime import datetime
 #                                                    EVENEMENTS                                                       #
 #######################################################################################################################
 
+
 class EventView:
     def __init__(self, main_view):
         self.main_view = main_view
@@ -50,7 +51,17 @@ class EventView:
         location = input("📍 Lieu de l'événement : ")
         attendees = input("🧑‍🤝‍🧑 Nombre d'invités : ")
         notes = input("📝 Notes : ")
-        return title, contract_id, client_id, support_contact_id, start_datetime, end_datetime, location, attendees, notes
+        return (
+            title,
+            contract_id,
+            client_id,
+            support_contact_id,
+            start_datetime,
+            end_datetime,
+            location,
+            attendees,
+            notes,
+        )
 
     def print_update_event_view(self, events):
         """Affiche la liste des événements et demande l'ID de l'événement à modifier."""
@@ -70,7 +81,6 @@ class EventView:
         choice = input("⚙️ Veuillez entrer l'ID de l'événement à modifier : ")
         return int(choice)
 
-
     def print_update_event_form(self):
         """Affiche le formulaire pour modifier un événement."""
         self.main_view.print_welcome_message()
@@ -87,7 +97,17 @@ class EventView:
         start_datetime = datetime.strptime(start_datetime, "%d/%m/%Y %H:%M")
         end_datetime = datetime.strptime(end_datetime, "%d/%m/%Y %H:%M")
 
-        return title, contract_id, client_id, support_contact_id, start_datetime, end_datetime, location, attendees, notes
+        return (
+            title,
+            contract_id,
+            client_id,
+            support_contact_id,
+            start_datetime,
+            end_datetime,
+            location,
+            attendees,
+            notes,
+        )
 
     def print_delete_event_view(self, events):
         """Affiche la liste des événements et demande l'ID de l'événement à supprimer."""

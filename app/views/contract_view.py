@@ -4,6 +4,7 @@ from datetime import datetime
 #                                                    CONTRATS                                                         #
 #######################################################################################################################
 
+
 class ContractView:
     def __init__(self, main_view):
         self.main_view = main_view
@@ -28,7 +29,9 @@ class ContractView:
             print(f"🔹 Contrat ID       : {contract.id}")
             print(f"🧾 Client           : {contract.client.name if contract.client else 'Inconnu'}")
             print(f"💰 Montant total    : {contract.total_amount} €")
-            print(f"💼 Commercial       : {contract.contact_commercial.email if contract.contact_commercial else 'N/A'}")
+            print(
+                f"💼 Commercial       : {contract.contact_commercial.email if contract.contact_commercial else 'N/A'}"
+            )
             print(f"🧾 Restant dû       : {contract.remaining_amount} €")
             print(f"📅 Date de création : {contract.created_at.strftime('%d/%m/%Y')}")
             print(f"🔐 Signé            : {'Oui' if contract.signed else 'Non'}")
@@ -56,7 +59,9 @@ class ContractView:
             print(f"🔹 Contrat ID       : {contract.id}")
             print(f"🧾 Client           : {contract.client.name if contract.client else 'Inconnu'}")
             print(f"💰 Montant total    : {contract.total_amount} €")
-            print(f"💼 Commercial       : {contract.contact_commercial.email if contract.contact_commercial else 'N/A'}")
+            print(
+                f"💼 Commercial       : {contract.contact_commercial.email if contract.contact_commercial else 'N/A'}"
+            )
             print(f"🧾 Restant dû       : {contract.remaining_amount} €")
             print(f"📅 Date de création : {contract.created_at.strftime('%d/%m/%Y')}")
             print(f"🔐 Signé            : {'Oui' if contract.signed else 'Non'}")
@@ -73,7 +78,6 @@ class ContractView:
         signed = input("🔐 Signé ? (oui/non, laisser vide pour ne pas changer) : ")
         return client, commercial_id, total_amount, remaining_amount, signed
 
-
     def print_delete_contract_view(self, contracts):
         """Affiche la liste des contrats et demande l'ID du contrat à supprimer."""
         self.main_view.print_welcome_message()
@@ -82,7 +86,9 @@ class ContractView:
             print(f"🔹 Contrat ID       : {contract.id}")
             print(f"🧾 Client           : {contract.client.name if contract.client else 'Inconnu'}")
             print(f"💰 Montant total    : {contract.total_amount} €")
-            print(f"💼 Commercial       : {contract.contact_commercial.email if contract.contact_commercial else 'N/A'}")
+            print(
+                f"💼 Commercial       : {contract.contact_commercial.email if contract.contact_commercial else 'N/A'}"
+            )
             print(f"🧾 Restant dû       : {contract.remaining_amount} €")
             print(f"📅 Date de création : {contract.created_at.strftime('%d/%m/%Y')}")
             print(f"🔐 Signé            : {'Oui' if contract.signed else 'Non'}")

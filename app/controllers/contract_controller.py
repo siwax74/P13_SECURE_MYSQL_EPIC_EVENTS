@@ -50,7 +50,7 @@ class ContractController(CRUDMixin):
             else:
                 print("❌ Choix invalide.")
                 return None
-            
+
     @Decorator.with_banner
     @Decorator.safe_execution
     @BasePermissions.check_permission("is_commercial", "is_management")
@@ -59,7 +59,9 @@ class ContractController(CRUDMixin):
         Crée un nouveau contrat pour un client donné, en s’assurant que l’utilisateur a les droits requis.
         Retourne l'objet Contract créé ou None si une erreur survient.
         """
-        client_id, total_amount, commercial_id, remaining_amount, signed_input = self.contract_view.print_create_contract_view()
+        client_id, total_amount, commercial_id, remaining_amount, signed_input = (
+            self.contract_view.print_create_contract_view()
+        )
 
         if not client_id or not total_amount or not commercial_id or not remaining_amount or not signed_input:
             print("❌ Tous les champs sont obligatoires.")
@@ -72,7 +74,7 @@ class ContractController(CRUDMixin):
         except ValueError:
             print("❌ Les montants et les IDs doivent être des nombres valides.")
             return None
-        
+
         if signed_input.lower() not in ["oui", "non"]:
             print("❌ Valeur pour 'Signé' invalide. Utilisez 'oui' ou 'non'.")
             return None
@@ -87,7 +89,7 @@ class ContractController(CRUDMixin):
         if not commercial:
             print("❌ Le commercial n'a pas été trouvé.")
             return None
-        
+
         if self.authenticated_user.is_commercial and client.contact_commercial_id != self.authenticated_user.id:
             print("❌ Vous ne pouvez créer des contrats que pour vos clients.")
             return None
@@ -128,7 +130,9 @@ class ContractController(CRUDMixin):
         commercial_id: Any
         total_amount: Any
         remaining_amount: Any
-        client_id, commercial_id, total_amount, remaining_amount, signed_input = self.contract_view.print_update_contract_form()
+        client_id, commercial_id, total_amount, remaining_amount, signed_input = (
+            self.contract_view.print_update_contract_form()
+        )
 
         update_data: dict[str, Any] = {}
         if is_valid_id(client_id):
